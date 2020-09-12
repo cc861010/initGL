@@ -5,6 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "stb_image.h"
+#include <stdbool.h>
 #include "GLES3/gl3.h"
 
 

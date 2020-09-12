@@ -1,6 +1,6 @@
 #include "Shader.h"
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 #include <SDL.h>
 #include "angle_gl.h"
 

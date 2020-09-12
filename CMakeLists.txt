@@ -1,13 +1,15 @@
 # Project definition
 cmake_minimum_required(VERSION 3.1)
-project(InitGL)
+project(InitGL VERSION 1.0
+        DESCRIPTION "Very nice project"
+        LANGUAGES C)
 
 # Source files
 include_directories(include)
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries")
 #set(SOURCES "${SRC_DIR}/main.cpp")
-file(GLOB SOURCES  "${SRC_DIR}/*.cpp" "${SRC_DIR}/*.h")
+file(GLOB SOURCES  "${SRC_DIR}/*.c" "${SRC_DIR}/*.h")
 file(GLOB RESOURCE "${SRC_DIR}/*.frag" "${SRC_DIR}/*.vert" "${SRC_DIR}/*.png")
 file(COPY ${RESOURCE} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -17,26 +19,26 @@ target_include_directories(${PROJECT_NAME} PRIVATE "${SRC_DIR}")
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
 
-# GLFW
-# set(GLFW_DIR "${LIB_DIR}/glfw")
-# set(GLFW_BUILD_EXAMPLES OFF CACHE INTERNAL "Build the GLFW example programs")
-# set(GLFW_BUILD_TESTS OFF CACHE INTERNAL "Build the GLFW test programs")
-# set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "Build the GLFW documentation")
-# set(GLFW_INSTALL OFF CACHE INTERNAL "Generate installation target")
-# add_subdirectory("${GLFW_DIR}")
-# target_link_libraries(${PROJECT_NAME} "glfw" "${GLFW_LIBRARIES}")
-# target_include_directories(${PROJECT_NAME} PRIVATE "${GLFW_DIR}/include")
-# target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")
 
-# SDL2
-set(SDL_DIR "${LIB_DIR}/SDL2")
-add_subdirectory("${SDL_DIR}")
-target_link_libraries (${PROJECT_NAME} SDL2-static)
-target_include_directories(${PROJECT_NAME} PRIVATE "${SDL_DIR}/include")
-target_compile_definitions(${PROJECT_NAME} PRIVATE "SDL_INCLUDE_NONE")
+# Pulling down SDL2
+include(FetchContent)
+FetchContent_Declare(
+        SDL2
+        GIT_REPOSITORY "https://github.com/SDL-mirror/SDL.git"
+        GIT_TAG release-2.0.12
+)
+FetchContent_GetProperties(SDL2)
+if (NOT sdl2_POPULATED)
+    FetchContent_Populate(SDL2)
+    add_subdirectory(${sdl2_SOURCE_DIR} ${sdl2_BINARY_DIR})
+endif ()
+target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static m)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
+
 
 # luajit
 add_subdirectory("${LIB_DIR}/luajit")
+
 
 # angle
 set(ANGLE_DIR "${LIB_DIR}/angle")

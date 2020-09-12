@@ -1,6 +1,7 @@
 
 #include <SDL.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include "stb_image.h"
 #include "angle_gl.h"
 #include "Shader.h"
