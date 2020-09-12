@@ -1,10 +1,11 @@
 #include "Shader.h"
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 #include <SDL.h>
 #include "angle_gl.h"
 
-static size_t fileGetLength(FILE *file) {
+
+size_t fileGetLength(FILE *file) {
     size_t length;
     size_t currPos = ftell(file);
     fseek(file, 0, SEEK_END);

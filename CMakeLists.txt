@@ -6,18 +6,19 @@ project(InitGL VERSION 1.0
 
 # Source files
 include_directories(include)
-set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source")
+set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries")
-#set(SOURCES "${SRC_DIR}/main.cpp")
-file(GLOB SOURCES  "${SRC_DIR}/*.c" "${SRC_DIR}/*.h")
-file(GLOB RESOURCE "${SRC_DIR}/*.frag" "${SRC_DIR}/*.vert" "${SRC_DIR}/*.png")
-file(COPY ${RESOURCE} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+set(RES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resource")
 
+file(COPY "${RES_DIR}/" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.c")
 # Executable definition and properties
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} "${SOURCES}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${SRC_DIR}")
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 11)
 
+
+add_executable(main ${SOURCES})
 
 
 # Pulling down SDL2
