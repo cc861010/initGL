@@ -3,15 +3,23 @@
 precision highp float;
 #endif
 
-out vec4 FragColor;
+in vec3 position;
+in vec3 normal;
+in vec2 uv;
 
-in vec3 ourColor;
-in vec2 TexCoord;
 
-// texture sampler
-uniform sampler2D texture1;
+uniform mat4 camera;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+out vec2 TexCoord;
 
 void main()
 {
-    FragColor = texture2D(texture1, TexCoord);
+    //gl_Position = projection * view * model * vec4(aPos, 1.0f);
+    gl_Position = vec4(aPos, 1.0f);
+    TexCoord = uv;
 }
+
+

@@ -36,6 +36,16 @@ endif ()
 target_link_libraries(${PROJECT_NAME} SDL2main SDL2-static m)
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
 
+# mathc
+#set(mathc "${LIB_DIR}/mathc")
+#target_include_directories(${PROJECT_NAME} PRIVATE "${mathc}")
+
+#cglm
+target_include_directories(${PROJECT_NAME} PRIVATE "${LIB_DIR}/cglm/include")
+add_subdirectory(${LIB_DIR}/cglm)
+target_link_libraries(${LIBRARY_NAME}  cglm)
+
+
 
 # luajit
 add_subdirectory("${LIB_DIR}/luajit")

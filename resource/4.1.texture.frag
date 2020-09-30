@@ -2,15 +2,17 @@
 #ifdef GL_ES
 precision highp float;
 #endif
+
+
 out vec4 FragColor;
 
+in vec3 ourColor;
 in vec2 TexCoord;
 
-// texture samplers
-uniform sampler2D sampler;
-
+// texture sampler
+uniform sampler2D texture1;
 
 void main()
 {
-    FragColor = texture(sampler, TexCoord);
+	FragColor = texture(texture1, TexCoord);
 }
