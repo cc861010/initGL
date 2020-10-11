@@ -9,7 +9,7 @@
 #include "GLES3/gl3.h"
 
 
-GLuint texture_load(const char *filename) {
+GLuint texture_create(const char *filename) {
 
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -37,7 +37,7 @@ GLuint texture_load(const char *filename) {
     return texture;
 }
 
-void texture_active_Bind(GLuint n){
+void texture_use(GLuint n) {
     glActiveTexture(GL_TEXTURE0 + n);
     glBindTexture(GL_TEXTURE_2D, n);
 }

@@ -14,18 +14,17 @@
  * @param filename  name of the image file to load
  * @return GLint the texture's name, or 0 if failed
  */
-GLuint texture_load(const char *filename);
+GLuint texture_create(const char *filename);
 
 /**
  * used before drawn in the main loop
  */
-void texture_active_Bind(GLuint);
+void texture_use(GLuint);
 
 /**
  * Deallocates a texture.
  * @param texName
  */
 void texture_free(GLuint texName);
-
 
 #endif

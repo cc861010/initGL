@@ -6,7 +6,7 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-int window(t_before_init _before_init, t_initialize _initialize, t_before_render _before_render, t_render _render, t_finish _finish) {
+int window(t_init init, t_update  _update, t_render _render, t_finish _finish) {
 
     // 1. Init SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -40,20 +40,29 @@ int window(t_before_init _before_init, t_initialize _initialize, t_before_render
         return EXIT_FAILURE;
     }
 
-    void * data = _before_init();
-    _initialize(data);
-    _before_render(data);
+    void * data = init();
 
     bool quit = false;
+    Uint32 last_time =SDL_GetTicks(), current_time=0 ,delta_time=0;
+
+    SDL_Event event;
     while (!quit) {
-        SDL_Event event;
-        if (SDL_WaitEvent(&event) != 0) {
-            if (event.type == SDL_QUIT) {
-                quit = true;
+        while(SDL_PollEvent( &event )){
+            switch (event.type) {
+                case SDL_QUIT:
+                    quit = true;
+                    break;
+                default:
+                    _update(data,delta_time,&event);
             }
         }
-        _render(data);
+
+        _render(data,delta_time);
         SDL_GL_SwapWindow(window);
+
+        current_time = SDL_GetTicks();
+        delta_time = current_time - last_time;
+        last_time = current_time;
     }
     _finish(data);
     return EXIT_SUCCESS;

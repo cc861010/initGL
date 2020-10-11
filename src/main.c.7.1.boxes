@@ -8,19 +8,16 @@
 #include "window.h"
 #include "string.h"
 #include "vertex.h"
-#include "camera.h"
-#include "input.h"
 
 
 typedef struct {
-    input_state * input;
     void * cube_position;
     float *data_buffer;
     unsigned int data_buffer_size;
     int data_count;
     GLuint data_texture;
     GLuint data_texture1;
-    camera data_camera;
+    vec3 data_camera;
     mat4 data_model;
     mat4 data_view;
     mat4 data_projection;
@@ -40,11 +37,16 @@ typedef struct {
     GLuint uniform_sampler;
 } context;
 
-void * init() {
-    context c = {0};
-    context *variable = malloc(sizeof(context));
-    memcpy(variable, &c, sizeof(context));
 
+void *before_init() {
+    context c = {0};
+    void *r = malloc(sizeof(context));
+    memcpy(r, &c, sizeof(context));
+    return r;
+}
+
+void init(void *data) {
+    context *variable = (context *) data;
     variable->shader_program = shader_programs_load("resource/7.1.camera.vs", "resource/7.1.camera.fs");
     float vertices[] = {
             //position and texture coord attribute
@@ -127,45 +129,35 @@ void * init() {
 
     variable->cube_position = cubePositions;
 
-    camera_init(&(variable->data_camera), NULL, NULL, NULL, NULL);
-    shader_setMat4(variable->shader_program, "view", variable->data_camera.view);
+}
+
+void before_render(void *data) {
+    context *variable = (context *) data;
+
+    Uint32 current_time = SDL_GetTicks();
+    float radius = 10.0f;
+    float camX   = sin(current_time/160) * radius;
+    float camZ   = cos(current_time/160) * radius;
+
+    vec3 eye = {camX, 0, camZ};
+    //view matrix.
+    mat4 view = {
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+    };
+    vec3 target = {0.0f, 0.0f, 0.0f};
+    vec3 up = {0.0f, 1.0f, 0.0f};
+    glm_lookat(eye, target, up, view);
+
+    shader_setMat4(variable->shader_program, "view", view);
 
     glEnable(GL_DEPTH_TEST);
-
-    variable->input = input_init();
-
-    return variable;
 }
 
-
-void update(void * data, Uint32 delta_time,SDL_Event * event){
+void render(void *data) {
     context *variable = (context *) data;
-
-    if(input_isKeyPressed(variable->input,SDL_SCANCODE_A)){
-        camera_processKeyboard(&(variable->data_camera),LEFT,delta_time);
-    }
-    if(input_isKeyPressed(variable->input,SDL_SCANCODE_W)){
-        camera_processKeyboard(&(variable->data_camera),FORWARD,delta_time);
-    }
-    if(input_isKeyPressed(variable->input,SDL_SCANCODE_S)){
-        camera_processKeyboard(&(variable->data_camera),BACKWARD,delta_time);
-    }
-    if(input_isKeyPressed(variable->input,SDL_SCANCODE_D)){
-        camera_processKeyboard(&(variable->data_camera),RIGHT,delta_time);
-    }
-
-    int dx,dy;
-    input_mouse_delta(variable->input,&dx,&dy);
-    camera_processMouseMovement(&(variable->data_camera),dx,dy,true);
-    shader_setMat4(variable->shader_program, "view", variable->data_camera.view);
-
-}
-
-
-void render(void *data, Uint32 delta_time) {
-    context *variable = (context *) data;
-
-
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // bind textures on corresponding texture units
@@ -204,5 +196,5 @@ void finish(void *data) {
 }
 
 int main(int argc, char *argv[]) {
-    return window(init, update, render, finish);
+    return window(before_init, init, before_render, render, finish);
 }

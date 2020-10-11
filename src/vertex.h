@@ -18,8 +18,10 @@ typedef struct {
 vertex_attribute * vertex_layout_create(int num, ...);
 
 GLuint
-vertex_data_load(GLuint shader_program, vertex_attribute *vertex_attributes, void *vertices_array, int vertices_array_size,
+vertex_data_load_ebo(GLuint shader_program, vertex_attribute *vertex_attributes, void *vertices_array, int vertices_array_size,
             const int *indices_array, int indices_array_size);
 
+GLuint
+vertex_data_load(GLuint shader_program, vertex_attribute *vertex_attributes, void *vertices_array, int vertices_array_size);
 
 #endif

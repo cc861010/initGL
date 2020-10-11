@@ -124,3 +124,56 @@ GLuint shader_programs_load(const char *vertFilename, const char *fragFilename) 
 void shader_programs_free(GLuint shaderProgram){
     glDeleteProgram(shaderProgram);
 }
+
+void shader_use(GLuint program_id) {
+    glUseProgram(program_id);
+}
+
+void shader_setBool(GLuint program_id, const char *name, bool value) {
+    glUniform1i(glGetUniformLocation(program_id, name), (int) value);
+}
+
+void shader_setInt(GLuint program_id, const char *name, int value) {
+    glUniform1i(glGetUniformLocation(program_id, name), value);
+}
+
+void shader_setFloat(GLuint program_id, const char *name, float value) {
+    glUniform1f(glGetUniformLocation(program_id, name), value);
+}
+
+void shader_setVec2v(GLuint program_id, const char *name, void *value) {
+    glUniform2fv(glGetUniformLocation(program_id, name), 1, (float *)value);
+}
+
+void shader_setVec2(GLuint program_id, const char *name, float x, float y) {
+    glUniform2f(glGetUniformLocation(program_id, name), x, y);
+}
+
+
+void shader_setVec3v(GLuint program_id, const char *name, void *value) {
+    glUniform3fv(glGetUniformLocation(program_id, name), 1, (float *)value);
+}
+
+void shader_setVec3(GLuint program_id, const char *name, float x, float y, float z) {
+    glUniform3f(glGetUniformLocation(program_id, name), x, y, z);
+}
+
+void shader_setVec4v(GLuint program_id, const char *name, void *value) {
+    glUniform4fv(glGetUniformLocation(program_id, name), 1, (float *)value);
+}
+
+void shader_setVec4(GLuint program_id, const char *name, float x, float y, float z, float w) {
+    glUniform4f(glGetUniformLocation(program_id, name), x, y, z, w);
+}
+
+void shader_setMat2(GLuint program_id, const char *name, void *value) {
+    glUniformMatrix2fv(glGetUniformLocation(program_id, name), 1, GL_FALSE, (float *)value);
+}
+
+void shader_setMat3(GLuint program_id, const char *name, void *value) {
+    glUniformMatrix3fv(glGetUniformLocation(program_id, name), 1, GL_FALSE, (float *)value);
+}
+
+void shader_setMat4(GLuint program_id, const char *name, void *value) {
+    glUniformMatrix4fv(glGetUniformLocation(program_id, name), 1, GL_FALSE, (float *)value);
+}

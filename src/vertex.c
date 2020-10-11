@@ -59,7 +59,7 @@ vertex_attribute * vertex_layout_create(int num, ...) {
  * @return
  */
 GLuint
-vertex_data_load(GLuint shader_program, vertex_attribute *vertex_attributes, void *vertices_array, int vertices_array_size,
+vertex_data_load_ebo(GLuint shader_program, vertex_attribute *vertex_attributes, void *vertices_array, int vertices_array_size,
             const int *indices_array, int indices_array_size) {
 
     unsigned int VAO, VBO, EBO;
@@ -87,5 +87,28 @@ vertex_data_load(GLuint shader_program, vertex_attribute *vertex_attributes, voi
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    return VAO;
+}
+
+GLuint
+vertex_data_load(GLuint shader_program, vertex_attribute *vertex_attributes, void *vertices_array, int vertices_array_size) {
+    unsigned int VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices_array_size, vertices_array, GL_STATIC_DRAW);
+    vertex_attribute *temp = vertex_attributes;
+    do {
+        temp->_vertex_location = glGetAttribLocation(shader_program, temp->name);
+        //todo assert if the location is not found.
+        glVertexAttribPointer(temp->_vertex_location, temp->number_of_data, GL_FLOAT, GL_FALSE, temp->_stride,
+                              (void *) (temp->_offset));
+        glEnableVertexAttribArray(temp->_vertex_location);
+        temp = temp->_next;
+    } while (temp != 0);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     return VAO;
 }

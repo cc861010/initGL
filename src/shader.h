@@ -20,21 +20,31 @@ GLuint shader_programs_load(const char *vertFilename, const char *fragFilename);
  */
 void shader_programs_free(GLuint program_id);
 
-void use(GLuint program_id) {
-    glUseProgram(program_id);
-}
+void shader_use(GLuint program_id);
 
-void set_bool(GLuint program_id, const char *name, bool value) {
-    glUniform1i(glGetUniformLocation(program_id, name), (int) value);
-}
+void shader_setBool(GLuint program_id, const char *name, bool value);
 
-void set_int(GLuint program_id, const char *name, int value) {
-    glUniform1i(glGetUniformLocation(program_id, name), value);
-}
+void shader_setInt(GLuint program_id, const char *name, int value);
 
-void set_float(GLuint program_id, const char *name, float value) {
-    glUniform1f(glGetUniformLocation(program_id, name), value);
-}
+void shader_setFloat(GLuint program_id, const char *name, float value);
+
+void shader_setVec2v(GLuint program_id, const char *name, void *value);
+
+void shader_setVec2(GLuint program_id, const char *name, float x, float y);
+
+void shader_setVec3v(GLuint program_id, const char *name, void *value);
+
+void shader_setVec3(GLuint program_id, const char *name, float x, float y, float z);
+
+void shader_setVec4v(GLuint program_id, const char *name, void *value);
+
+void shader_setVec4(GLuint program_id, const char *name, float x, float y, float z, float w);
+
+void shader_setMat2(GLuint program_id, const char *name, void *value);
+
+void shader_setMat3(GLuint program_id, const char *name, void *value);
+
+void shader_setMat4(GLuint program_id, const char *name, void *value);
 
 
 #endif
