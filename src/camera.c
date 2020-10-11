@@ -34,37 +34,39 @@ void updateCameraVectors(camera *camera) {
     _update_viewMatrix(camera);
 }
 
-void camera_init(camera *camera, vec3 position, vec3 up, float *yaw, float *pitch) {
-    camera->Front[0] = 0.0f;
-    camera->Front[1] = 0.0f;
-    camera->Front[2] = -1.0f;
-    camera->MovementSpeed = SPEED;
-    camera->MouseSensitivity = MOUSE_SENSITIVITY;
-    camera->Zoom = ZOOM;
+camera * camera_init(vec3 position, vec3 up, float *yaw, float *pitch) {
+    camera * this = malloc(sizeof(camera));
+
+    this->Front[0] = 0.0f;
+    this->Front[1] = 0.0f;
+    this->Front[2] = -1.0f;
+    this->MovementSpeed = SPEED;
+    this->MouseSensitivity = MOUSE_SENSITIVITY;
+    this->Zoom = ZOOM;
     //init position
     if (position == NULL) {
-        camera->Position[0] = 0.0f;
-        camera->Position[1] = 0.0f;
-        camera->Position[2] = 0.0f;
+        this->Position[0] = 0.0f;
+        this->Position[1] = 0.0f;
+        this->Position[2] = 0.0f;
     } else {
-        camera->Position[0] = position[0];
-        camera->Position[1] = position[1];
-        camera->Position[2] = position[2];
+        this->Position[0] = position[0];
+        this->Position[1] = position[1];
+        this->Position[2] = position[2];
     };
     //init up
     if (up == NULL) {
-        camera->WorldUp[0] = 0.0f;
-        camera->WorldUp[1] = 1.0f;
-        camera->WorldUp[2] = 0.0f;
+        this->WorldUp[0] = 0.0f;
+        this->WorldUp[1] = 1.0f;
+        this->WorldUp[2] = 0.0f;
     } else {
-        camera->WorldUp[0] = up[0];
-        camera->WorldUp[1] = up[1];
-        camera->WorldUp[2] = up[2];
+        this->WorldUp[0] = up[0];
+        this->WorldUp[1] = up[1];
+        this->WorldUp[2] = up[2];
     }
     //init Yaw
-    camera->Yaw = (yaw == NULL ? YAW : *yaw);
+    this->Yaw = (yaw == NULL ? YAW : *yaw);
     //init Pitch
-    camera->Pitch = (pitch == NULL ? PITCH : *pitch);
+    this->Pitch = (pitch == NULL ? PITCH : *pitch);
     //init view matrix
     mat4 view = {
             1, 0, 0, 0,
@@ -72,8 +74,9 @@ void camera_init(camera *camera, vec3 position, vec3 up, float *yaw, float *pitc
             0, 0, 1, 0,
             0, 0, 0, 1
     };
-    memcpy(camera->view, &view, sizeof(view));
-    updateCameraVectors(camera);
+    memcpy(this->view, &view, sizeof(view));
+    updateCameraVectors(this);
+    return this;
 }
 
 
@@ -129,4 +132,8 @@ void camera_processMouseScroll(camera *camera, float y_offset) {
     if (camera->Zoom > 45.0f)
         camera->Zoom = 45.0f;
     updateCameraVectors(camera);
+}
+
+void camera_free(camera *camera){
+    free(camera);
 }

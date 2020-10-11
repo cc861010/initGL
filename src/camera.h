@@ -30,7 +30,7 @@ typedef struct camera {
     mat4 view;
 } camera;
 
-void camera_init(camera * camera,vec3 position, vec3 up, float * yaw, float * pitch);
+camera * camera_init(vec3 position, vec3 up, float * yaw, float * pitch);
 
 // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
 void camera_processKeyboard(camera *camera, enum Camera_Movement direction, float deltaTime);
@@ -40,5 +40,7 @@ void camera_processMouseMovement(camera *camera,float x_offset, float y_offset, 
 
 // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
 void camera_processMouseScroll(camera *camera,float y_offset);
+
+void camera_free(camera *camera);
 
 #endif

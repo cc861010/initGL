@@ -13,14 +13,13 @@
 
 
 typedef struct {
-    input_state * input;
     void * cube_position;
     float *data_buffer;
     unsigned int data_buffer_size;
     int data_count;
     GLuint data_texture;
     GLuint data_texture1;
-    camera data_camera;
+    camera * data_camera;
     mat4 data_model;
     mat4 data_view;
     mat4 data_projection;
@@ -127,12 +126,12 @@ void * init() {
 
     variable->cube_position = cubePositions;
 
-    camera_init(&(variable->data_camera), NULL, NULL, NULL, NULL);
-    shader_setMat4(variable->shader_program, "view", variable->data_camera.view);
+    variable->data_camera = camera_init(NULL, NULL, NULL, NULL);
+    shader_setMat4(variable->shader_program, "view", variable->data_camera->view);
 
     glEnable(GL_DEPTH_TEST);
 
-    variable->input = input_init();
+    input_init();
 
     return variable;
 }
@@ -141,23 +140,23 @@ void * init() {
 void update(void * data, Uint32 delta_time,SDL_Event * event){
     context *variable = (context *) data;
 
-    if(input_isKeyPressed(variable->input,SDL_SCANCODE_A)){
-        camera_processKeyboard(&(variable->data_camera),LEFT,delta_time);
+    if(input_isKeyPressed(SDL_SCANCODE_A)){
+        camera_processKeyboard(variable->data_camera,LEFT,delta_time);
     }
-    if(input_isKeyPressed(variable->input,SDL_SCANCODE_W)){
-        camera_processKeyboard(&(variable->data_camera),FORWARD,delta_time);
+    if(input_isKeyPressed(SDL_SCANCODE_W)){
+        camera_processKeyboard(variable->data_camera,FORWARD,delta_time);
     }
-    if(input_isKeyPressed(variable->input,SDL_SCANCODE_S)){
-        camera_processKeyboard(&(variable->data_camera),BACKWARD,delta_time);
+    if(input_isKeyPressed(SDL_SCANCODE_S)){
+        camera_processKeyboard(variable->data_camera,BACKWARD,delta_time);
     }
-    if(input_isKeyPressed(variable->input,SDL_SCANCODE_D)){
-        camera_processKeyboard(&(variable->data_camera),RIGHT,delta_time);
+    if(input_isKeyPressed(SDL_SCANCODE_D)){
+        camera_processKeyboard(variable->data_camera,RIGHT,delta_time);
     }
-
     int dx,dy;
-    input_mouse_delta(variable->input,&dx,&dy);
-    camera_processMouseMovement(&(variable->data_camera),dx,dy,true);
-    shader_setMat4(variable->shader_program, "view", variable->data_camera.view);
+    input_mouse_offset(&dx,&dy);
+
+    camera_processMouseMovement(variable->data_camera,dx,dy,true);
+    shader_setMat4(variable->shader_program, "view", variable->data_camera->view);
 
 }
 
