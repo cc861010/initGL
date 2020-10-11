@@ -11,6 +11,81 @@
 #include "camera.h"
 #include "input.h"
 
+void make_vertex(
+        float *data, //float ao[6][4], float light[6][4],
+        bool left, bool right, bool top, bool bottom, bool front, bool back,
+        int wleft, int wright, int wtop, int wbottom, int wfront, int wback,
+        float x, float y, float z) {
+    float n = 0.5;
+    static const float positions[6][4][3] = {
+            {{-1, -1, -1}, {-1, -1, +1}, {-1, +1, -1}, {-1, +1, +1}},
+            {{+1, -1, -1}, {+1, -1, +1}, {+1, +1, -1}, {+1, +1, +1}},
+            {{-1, +1, -1}, {-1, +1, +1}, {+1, +1, -1}, {+1, +1, +1}},
+            {{-1, -1, -1}, {-1, -1, +1}, {+1, -1, -1}, {+1, -1, +1}},
+            {{-1, -1, -1}, {-1, +1, -1}, {+1, -1, -1}, {+1, +1, -1}},
+            {{-1, -1, +1}, {-1, +1, +1}, {+1, -1, +1}, {+1, +1, +1}}
+    };
+    static const float normals[6][3] = {
+            {-1, 0,  0},
+            {+1, 0,  0},
+            {0,  +1, 0},
+            {0,  -1, 0},
+            {0,  0,  -1},
+            {0,  0,  +1}
+    };
+    static const float uvs[6][4][2] = {
+            {{0, 0}, {1, 0}, {0, 1}, {1, 1}},
+            {{1, 0}, {0, 0}, {1, 1}, {0, 1}},
+            {{0, 1}, {0, 0}, {1, 1}, {1, 0}},
+            {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
+            {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
+            {{1, 0}, {1, 1}, {0, 0}, {0, 1}}
+    };
+    static const float indices[6][6] = {
+            {0, 3, 2, 0, 1, 3},
+            {0, 3, 1, 0, 2, 3},
+            {0, 3, 2, 0, 1, 3},
+            {0, 3, 1, 0, 2, 3},
+            {0, 3, 2, 0, 1, 3},
+            {0, 3, 1, 0, 2, 3}
+    };
+    static const float flipped[6][6] = {
+            {0, 1, 2, 1, 3, 2},
+            {0, 2, 1, 2, 3, 1},
+            {0, 1, 2, 1, 3, 2},
+            {0, 2, 1, 2, 3, 1},
+            {0, 1, 2, 1, 3, 2},
+            {0, 2, 1, 2, 3, 1}
+    };
+    float *d = data;
+    float s = 0.0625; // 1/16
+    float a = 0 + 1 / 2048.0;
+    float b = s - 1 / 2048.0;
+    bool faces[6] = {left, right, top, bottom, front, back};
+    int tiles[6] = {wleft, wright, wtop, wbottom, wfront, wback};
+    for (int i = 0; i < 6; i++) {
+        if (faces[i] == false) {
+            continue;
+        }
+        float du = (tiles[i] % 16) * s;
+        float dv = (tiles[i] / 16) * s;
+        //int flip = ao[i][0] + ao[i][3] > ao[i][1] + ao[i][2];
+        int flip = 0;
+        for (int v = 0; v < 6; v++) {
+            int j = flip ? flipped[i][v] : indices[i][v];
+            *(d++) = x + n * positions[i][j][0];
+            *(d++) = y + n * positions[i][j][1];
+            *(d++) = z + n * positions[i][j][2];
+            *(d++) = normals[i][0];
+            *(d++) = normals[i][1];
+            *(d++) = normals[i][2];
+            *(d++) = du + (uvs[i][j][0] ? b : a);
+            *(d++) = dv + (uvs[i][j][1] ? b : a);
+            //*(d++) = ao[i][j];
+            //*(d++) = light[i][j];
+        }
+    }
+}
 
 typedef struct {
     void * cube_position;
@@ -44,61 +119,17 @@ void * init() {
     context *variable = malloc(sizeof(context));
     memcpy(variable, &c, sizeof(context));
 
-    variable->shader_program = shader_programs_load("resource/7.1.camera.vs", "resource/7.1.camera.fs");
-    float vertices[] = {
-            //position and texture coord attribute
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+    variable->shader_program = shader_programs_load("resource/7.1.camera.craft.vs", "resource/7.1.camera.craft.fs");
+    float vertices[6*6*8] = {0};
+    make_vertex(vertices,true,true,true,true,true,true,16, 16, 32, 0, 16, 16,0,0,0);
 
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-            -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-
-            -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-            -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f
-    };
-
-    vertex_attribute *vertex_attr = vertex_layout_create(6, "aPos", 3, sizeof(float), "aTexCoord", 2, sizeof(float));
+    vertex_attribute *vertex_attr = vertex_layout_create(9, "position", 3, sizeof(float),"normal", 3, sizeof(float), "uv", 2, sizeof(float));
     variable->VAO = vertex_data_load(variable->shader_program, vertex_attr, vertices, sizeof(vertices));
 
-    variable->data_texture1 = texture_create("resource/awesomeface.png");
-    variable->data_texture = texture_create("resource/container2.png");
+    variable->data_texture = texture_create("resource/texture.png");
 
     shader_use(variable->shader_program);
     shader_setInt(variable->shader_program, "texture1", variable->data_texture);
-    shader_setInt(variable->shader_program, "texture2", variable->data_texture1);
 
     //projection matrix
     mat4 projection = {
@@ -108,7 +139,6 @@ void * init() {
             0, 0, 0, 1
     };
     glm_perspective(glm_rad(30.0f), (float) 800 / (float) 600, 0.1f, 100.0f, projection);
-
 
     shader_setMat4(variable->shader_program, "projection", projection);
 
@@ -136,7 +166,6 @@ void * init() {
     return variable;
 }
 
-
 void update(void * data, Uint32 delta_time,SDL_Event * event){
     context *variable = (context *) data;
 
@@ -160,10 +189,8 @@ void update(void * data, Uint32 delta_time,SDL_Event * event){
 
 }
 
-
 void render(void *data, Uint32 delta_time) {
     context *variable = (context *) data;
-
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -189,8 +216,8 @@ void render(void *data, Uint32 delta_time) {
         vec3 position = {};
         glm_vec3_scale(cubePositions[i],3,position);
         glm_translate(model, position);
-        float angle = 20.0f * i;
-        glm_rotate(model, glm_rad(angle), (vec3) {1.0f, 1.3f, 0.5f});
+//        float angle = 20.0f * i;
+//        glm_rotate(model, glm_rad(angle), (vec3) {1.0f, 1.3f, 0.5f});
         shader_setMat4(variable->shader_program, "model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }

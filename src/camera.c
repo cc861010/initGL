@@ -11,10 +11,10 @@ const float ZOOM = 45.0f;
 void _update_viewMatrix(camera *camera) {
     float target[] = {0.0f, 0.0f, 0.0f};
     glm_vec3_add(camera->Position, camera->Front, target);
-    printf("eye:(%f,%f,%f),target:(%f,%f,%f),up:(%f,%f,%f)\n",
-           camera->Position[0], camera->Position[1], camera->Position[2],
-           target[0], target[1], target[2],
-           camera->Up[0], camera->Up[1], camera->Up[2]);
+//    printf("eye:(%f,%f,%f),target:(%f,%f,%f),up:(%f,%f,%f)\n",
+//           camera->Position[0], camera->Position[1], camera->Position[2],
+//           target[0], target[1], target[2],
+//           camera->Up[0], camera->Up[1], camera->Up[2]);
     glm_lookat(camera->Position, target, camera->Up, &(camera->view));
 }
 
