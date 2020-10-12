@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <angle_gl.h>
 #include "window.h"
 
 const unsigned int SCR_WIDTH = 800;
@@ -27,8 +28,8 @@ int window(t_init init, t_update  _update, t_render _render, t_finish _finish) {
 
     // 2. Create the window
     SDL_Window *window = SDL_CreateWindow("SDL2",
-                                          SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCR_WIDTH, SCR_HEIGHT,
-                                          SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCR_WIDTH, SCR_HEIGHT,
+                                          SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
     if (!window) {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Couldn't creat the main window", NULL);
         return EXIT_FAILURE;
@@ -51,6 +52,11 @@ int window(t_init init, t_update  _update, t_render _render, t_finish _finish) {
             switch (event.type) {
                 case SDL_QUIT:
                     quit = true;
+                    break;
+                case SDL_WINDOWEVENT:
+                    if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                        glViewport(0, 0, event.window.data1, event.window.data2);
+                    }
                     break;
                 default:
                     _update(data,delta_time,&event);
