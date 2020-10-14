@@ -1,4 +1,4 @@
-
+#include "stdio.h"
 #include "angle_gl.h"
 #include "shader.h"
 #include "texture.h"
@@ -9,6 +9,8 @@
 #include "vertex.h"
 #include "camera.h"
 #include "input.h"
+#include "noise.h"
+#include "open-simplex-noise.h"
 
 void make_block_vertex_288f_36c(
         float *data, //float ao[6][4], float light[6][4],
@@ -94,6 +96,59 @@ typedef struct {
     GLuint data_texture;
 } context;
 
+int blocks_list[][6] = {
+        {16, 16, 32, 0,  16, 16}, // 1 - grass
+        {1,  1,  1,  1,  1,  1}, // 2 - sand
+        {2,  2,  2,  2,  2,  2}, // 3 - stone
+        {3,  3,  3,  3,  3,  3}, // 4 - brick
+        {20, 20, 36, 4,  20, 20}, // 5 - wood
+        {5,  5,  5,  5,  5,  5}, // 6 - cement
+        {6,  6,  6,  6,  6,  6}, // 7 - dirt
+        {7,  7,  7,  7,  7,  7}, // 8 - plank
+        {24, 24, 40, 8,  24, 24}, // 9 - snow
+        {9,  9,  9,  9,  9,  9}, // 10 - glass
+        {10, 10, 10, 10, 10, 10}, // 11 - cobble
+        {11, 11, 11, 11, 11, 11}, // 12 - light stone
+        {12, 12, 12, 12, 12, 12}, // 13 - dark stone
+        {13, 13, 13, 13, 13, 13}, // 14 - chest
+        {14, 14, 14, 14, 14, 14}, // 15 - leaves
+        {15, 15, 15, 15, 15, 15}, // 16 - cloud
+};
+
+void make_world(GLuint shader_program, vertex_attribute *vertex_attributes, GLuint *VAO, GLsizei *count) {
+
+#define n 7000
+
+    float vertices[288 * n] = {0};
+
+    int p[n][3] = {0};
+    for (int i = 0, x = 0; x < pow(n, 0.333); x++) {
+        for (int y = 0; y < pow(n, 0.333); y++) {
+            for (int z = 0; z < pow(n, 0.333); z++) {
+                if (rand() % 4 == 0 || rand() % 5 == 0 || rand() % 6 == 0 || rand() % 7 == 0) {
+                    continue;
+                }
+                p[i][0] = x;
+                p[i][1] = y;
+                p[i][2] = z;
+                i++;
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        int type = rand() % (15 + 1);
+        make_block_vertex_288f_36c(vertices + 288 * i,
+                                   true, true, true, true, true, true,
+                                   blocks_list[type][0], blocks_list[type][1], blocks_list[type][2],
+                                   blocks_list[type][3], blocks_list[type][4], blocks_list[type][5],
+                                   p[i][0], p[i][1], p[i][2]);
+    }
+
+    *VAO = vertex_data_load(shader_program, vertex_attributes, vertices, sizeof(vertices));
+    *count = 36 * n;
+}
+
 void *init() {
     context c = {0};
     context *variable = malloc(sizeof(context));
@@ -104,20 +159,23 @@ void *init() {
     shader_use(variable->shader_program);
 
     //vertex
-    vertex_attribute *vertex_attr = vertex_layout_create(9, "position", 3, sizeof(float), "normal", 3, sizeof(float),"uv", 2, sizeof(float));
+    vertex_attribute *vertex_attr = vertex_layout_create(9, "position", 3, sizeof(float), "normal", 3, sizeof(float),
+                                                         "uv", 2, sizeof(float));
 
     //////////////////////magic begin///////////////////////////////////////////////////////////////////////////////
-    float vertices[288*6] = {0};
+//    float vertices[288 * 6] = {0};
+//
+//    make_block_vertex_288f_36c(vertices, true, true, true, true, true, true, 16, 16, 32, 0, 16, 16, 0, 0, 0);
+//    make_block_vertex_288f_36c(vertices + 288 * 1, true, true, true, true, true, true, 2, 2, 2, 2, 2, 2, 1, 0, 1);
+//    make_block_vertex_288f_36c(vertices + 288 * 2, true, true, true, true, true, true, 1, 1, 1, 1, 1, 1, 0, 0, 1);
+//    make_block_vertex_288f_36c(vertices + 288 * 3, true, true, true, true, true, true, 1, 1, 1, 1, 1, 1, 2, 0, 1);
+//    make_block_vertex_288f_36c(vertices + 288 * 4, true, true, true, true, true, true, 1, 1, 1, 1, 1, 1, 1, 0, 2);
+//    make_block_vertex_288f_36c(vertices + 288 * 5, true, true, true, true, true, true, 16, 16, 32, 0, 16, 16, 2, 0, 1);
+//
+//    variable->VAO = vertex_data_load(variable->shader_program, vertex_attr, vertices, sizeof(vertices));
+//    variable->count = 36 * 6;//
 
-    make_block_vertex_288f_36c(vertices, true, true, true, true, true, true, 16, 16, 32, 0, 16, 16, 0, 0, 0);
-    make_block_vertex_288f_36c(vertices + 288*1, true, true, true, true, true, true, 2, 2, 2, 2, 2, 2, 1, 0, 1);
-    make_block_vertex_288f_36c(vertices + 288*2, true, true, true, true, true, true, 1, 1, 1, 1, 1, 1, 0, 0, 1);
-    make_block_vertex_288f_36c(vertices + 288*3, true, true, true, true, true, true, 1, 1, 1, 1, 1, 1, 2, 0, 1);
-    make_block_vertex_288f_36c(vertices + 288*4, true, true, true, true, true, true, 1, 1, 1, 1, 1, 1, 1, 0, 2);
-    make_block_vertex_288f_36c(vertices + 288*5, true, true, true, true, true, true, 16, 16, 32, 0, 16, 16, 2, 0, 1);
-
-    variable->VAO = vertex_data_load(variable->shader_program, vertex_attr, vertices, sizeof(vertices));
-    variable->count = 36 *6 ;
+    make_world(variable->shader_program, vertex_attr, &(variable->VAO), &(variable->count));
 
     ///////////////////////magic end//////////////////////////////////////////////////////////////////////////////
 
@@ -169,7 +227,7 @@ void update(void *data, Uint32 delta_time, SDL_Event *event) {
     int dx, dy;
     input_mouse_offset(&dx, &dy);
 
-    camera_processMouseMovement(variable->data_camera, dx, dy, true);
+    camera_processMouseMovement(variable->data_camera, dx, dy, false);
     shader_setMat4(variable->shader_program, "view", variable->data_camera->view);
 
 }
@@ -192,5 +250,20 @@ void finish(void *data) {
 }
 
 int main(int argc, char *argv[]) {
+
+//    noise_init();
+//
+//    for(int i=0;i<100;i++){
+//        float x = ((float)i)/100;
+//        printf("noise( %f, %f)=====> %f\n",x,x,noise( x, x));
+//    }
+
+//    struct osn_context *ctx;
+//    open_simplex_noise(1234, &ctx);
+//    for(int i=0;i<1000;i++){
+//        float x = ((float)i)/1000;
+//        printf("open_simplex_noise3( %f, %f, %f)=====> %f\n",x,x,x,open_simplex_noise3(ctx,x,x,x));
+//    }
+
     return window(init, update, render, finish);
 }
