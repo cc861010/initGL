@@ -1,3 +1,25 @@
+/*
+//todo
+ -. sky box;
+ -. lights
+ -. physics
+ -. chunk
+ -. net
+
+ -. support Lua or Lisp
+ -. small games
+
+
+ -. noise - world (biomes, environment)
+ -. mmorpg
+
+
+
+
+ */
+
+
+
 #include "stdio.h"
 #include "angle_gl.h"
 #include "shader.h"
@@ -117,7 +139,7 @@ int blocks_list[][6] = {
 
 void make_world(GLuint shader_program, vertex_attribute *vertex_attributes, GLuint *VAO, GLsizei *count) {
 
-#define n 7000
+#define n 1000
 
     float vertices[288 * n] = {0};
 
